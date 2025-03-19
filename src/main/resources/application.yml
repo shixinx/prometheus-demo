@@ -1,0 +1,25 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: springboot-prometheus
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 打开所有 Actuator 服务
+        include: "*"
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: aaa
+    export:
+      prometheus:
+        # 指标允许被导出
+        enabled: true

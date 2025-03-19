@@ -1,0 +1,98 @@
+groups:
+  - name: Prometheus alert
+    rules:
+      # 对任何实例超过30秒无法联系的情况发出警报
+      - alert: 服务告警
+        expr: up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务异常,实例:{{ $labels.instance }}"
+          description: "{{ $labels.job }} 服务已关闭"
+  - name: mysql_trigger_frequency_rules
+    rules:
+      - alert: HighTriggerExecutionRate
+        expr: rate(mysql_global_status_questions[5m]) > 200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High trigger execution rate detected on MySQL server"
+          description: "The rate of statements processed by the MySQL server has exceeded 200 per second for the last 10 minutes, which may indicate abnormal trigger activity."
+      - alert: ExtremelyHighTriggerExecutionRate
+        expr: rate(mysql_global_status_questions[5m]) > 500
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Extremely high trigger execution rate detected on MySQL server"
+          description: "The rate of statements processed by the MySQL server has exceeded 500 per second for the last 5 minutes, which may severely impact database performance."
+
+  - name: mysql_trigger_transaction_rules
+    rules:
+      - alert: HighTriggerTransactionRollbackRate
+        expr: rate(mysql_global_status_handler_rollback[5m]) / rate(mysql_global_status_handler_commit[5m]) > 0.2
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High trigger transaction rollback rate detected on MySQL server"
+          description: "The ratio of transaction rollbacks to commits related to triggers has exceeded 20% for the last 15 minutes, which may indicate issues with trigger logic."
+      - alert: NoTriggerTransactionCommits
+        expr: rate(mysql_global_status_handler_commit[5m]) == 0
+        for: 20m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No trigger transaction commits detected on MySQL server"
+          description: "There have been no transaction commits related to triggers for the last 20 minutes, which may indicate a serious problem with the trigger or database."
+
+  - name: mysql_trigger_execution_time_rules
+    rules:
+      - alert: LongTriggerExecutionTime
+        expr: mysql_trigger_execution_time > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Long trigger execution time detected on MySQL server"
+          description: "The execution time of a trigger has exceeded 5 seconds for the last 5 minutes, which may slow down database operations."
+      - alert: ExtremelyLongTriggerExecutionTime
+        expr: mysql_trigger_execution_time > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Extremely long trigger execution time detected on MySQL server"
+          description: "The execution time of a trigger has exceeded 10 seconds for the last 2 minutes, which may cause significant performance degradation."
+
+  - name: mysql_trigger_lock_wait_rules
+    rules:
+      - alert: HighTriggerLockWaitTime
+        expr: mysql_global_status_innodb_row_lock_time_avg > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High trigger lock wait time detected on MySQL server"
+          description: "The average InnoDB row lock wait time has exceeded 100 milliseconds for the last 10 minutes, which may be caused by trigger execution."
+      - alert: ExtremelyHighTriggerLockWaitTime
+        expr: mysql_global_status_innodb_row_lock_time_avg > 500
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Extremely high trigger lock wait time detected on MySQL server"
+          description: "The average InnoDB row lock wait time has exceeded 500 milliseconds for the last 5 minutes, which may severely impact database concurrency."
+  - name: mysql_slow_query_rules
+    rules:
+      - alert: HighSlowQueryCount
+        expr: rate(mysql_global_status_slow_queries[5m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High number of slow queries detected on MySQL server"
+          description: "The rate of slow queries on the MySQL server has exceeded 10 per 5 minutes for the last 10 minutes."
+

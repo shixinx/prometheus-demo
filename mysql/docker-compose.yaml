@@ -1,0 +1,19 @@
+version: '3.3'
+services:
+  mysqld-exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld-exporter
+    restart: always
+    command:
+      - --collect.info_schema.processlist
+      - --collect.info_schema.innodb_metrics
+      - --collect.info_schema.tablestats
+      - --collect.info_schema.tables
+      - --collect.info_schema.userstats
+      - --collect.engine_innodb_status
+    environment:
+      - DATA_SOURCE_NAME=exporter:password@(localhost:3333)/
+    ports:
+      - 9104:9104
+    networks:
+      - monitoring
